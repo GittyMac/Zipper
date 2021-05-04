@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -11,6 +12,7 @@ namespace Zipper
         public OptionsForm()
         {
             InitializeComponent();
+            DebugMenu();
             if (Properties.Settings.Default.Dark == true)
             {
                 this.BackColor = Color.FromArgb(48, 48, 48);
@@ -70,6 +72,18 @@ namespace Zipper
         {
             Properties.Settings.Default.ListStyle = comboBox1.SelectedItem.ToString();
             Properties.Settings.Default.Save();
+        }
+
+        [Conditional("DEBUG")]
+        public void DebugMenu()
+        {
+            DebugButton.Visible = true;
+        }
+
+        private void DebugButton_Click(object sender, EventArgs e)
+        {
+            DebugForm debugBox = new DebugForm();
+            debugBox.Show();
         }
     }
 }

@@ -35,6 +35,7 @@
             this.button2 = new System.Windows.Forms.Button();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.DebugButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // checkBox1
@@ -118,12 +119,30 @@
             this.comboBox1.TabIndex = 15;
             this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
+            // DebugButton
+            // 
+            this.DebugButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(204)))), ((int)(((byte)(106)))));
+            this.DebugButton.FlatAppearance.BorderSize = 0;
+            this.DebugButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.DebugButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.DebugButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.DebugButton.Location = new System.Drawing.Point(182, 94);
+            this.DebugButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.DebugButton.Name = "DebugButton";
+            this.DebugButton.Size = new System.Drawing.Size(77, 61);
+            this.DebugButton.TabIndex = 16;
+            this.DebugButton.Text = "Debug Options";
+            this.DebugButton.UseVisualStyleBackColor = false;
+            this.DebugButton.Visible = false;
+            this.DebugButton.Click += new System.EventHandler(this.DebugButton_Click);
+            // 
             // OptionsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ClientSize = new System.Drawing.Size(272, 209);
+            this.Controls.Add(this.DebugButton);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.checkBox2);
             this.Controls.Add(this.button2);
@@ -149,5 +168,6 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Button DebugButton;
     }
 }
