@@ -22,15 +22,13 @@ namespace Zipper
         public int maxprogress;
         private ProgressForm progressBarForm = new ProgressForm();
         public string fileName;
+        public string dirName;
 
         public MainForm()
         {
             InitializeComponent();
 
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            notifyIcon1.Icon = ((Icon)(resources.GetObject("$this.Icon")));
-            notifyIcon1.Text = "Zipper";
-            notifyIcon1.Visible = true;
 
             menuStrip1.ForeColor = Color.FromArgb(49, 49, 49); //To keep consistentcy with Windows' titlebar.
 
@@ -117,6 +115,7 @@ namespace Zipper
             {
                 try
                 {
+                    dirName = "";
                     fileName = openFileDialog1.FileName;
                     var archive = ArchiveFactory.Open(fileName);
                     this.Text = "Zipper - " + openFileDialog1.FileName;
@@ -124,18 +123,21 @@ namespace Zipper
                     Properties.Settings.Default.Save();
                     foreach (var entry in archive.Entries)
                     {
-                            if (entry.Key.StartsWith(Path.GetFileName(entry.Key)))
-                            {
-                                ListViewItem lvi = new ListViewItem(entry.Key);
-                                lvi.SubItems.Add(entry.Size.ToString("N0"));
-                                lvi.SubItems.Add(entry.LastModifiedTime.ToString());
-                                listView1.Items.Add(lvi);
-                            }
+                        //Do something with this
+                        //(dirName == "" && Path.GetFileName(Path.GetDirectoryName(entry.Key)) == @"\" && entry.IsDirectory)
+
+                        if (entry.Key == dirName + Path.GetFileName(entry.Key) || entry.Key == dirName + "/" + Path.GetDirectoryName(entry.Key) + "/" || (Path.GetDirectoryName(entry.Key) == dirName + Path.GetFileName(Path.GetDirectoryName(entry.Key)) && entry.IsDirectory))
+                        {
+                            ListViewItem lvi = new ListViewItem(entry.Key, 1);
+                            lvi.SubItems.Add(entry.Size.ToString("N0"));
+                            lvi.SubItems.Add(entry.LastModifiedTime.ToString());
+                            listView1.Items.Add(lvi);
+                        }
                     }
                 }
                 catch
                 {
-                    MessageBox.Show("The selected archive is not a valid archive.", "Invalid Archive", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    OpenMessageBox("Invalid Archive", "The selected archive is not a valid archive.");
                 }
             }
         }
@@ -161,7 +163,7 @@ namespace Zipper
             }
             catch
             {
-                MessageBox.Show("The selected archive is not a valid archive.", "Invalid Archive", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                OpenMessageBox("Invalid Archive", "The selected archive is not a valid archive.");
             }
         }
 
@@ -194,10 +196,7 @@ namespace Zipper
                             progress += 1;
                         }
                         progressBarForm.Hide();
-                        notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
-                        notifyIcon1.BalloonTipText = "The file '" + Path.GetFileName(fileName) + "' has been successfully extracted.";
-                        notifyIcon1.BalloonTipTitle = "Extraction Complete";
-                        notifyIcon1.ShowBalloonTip(1000);
+                        OpenMessageBox("Extraction", "The archive has been successfully extracted.");
                     }
                 }
             }
@@ -221,10 +220,7 @@ namespace Zipper
                         progressBarForm.Step();
                     }
                     progressBarForm.Hide();
-                    notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
-                    notifyIcon1.BalloonTipText = "The file '" + Path.GetFileName(fileName) + "' has been successfully extracted.";
-                    notifyIcon1.BalloonTipTitle = "Extraction Complete";
-                    notifyIcon1.ShowBalloonTip(1000);
+                    OpenMessageBox("Extraction", "The archive has been successfully extracted.");
                 }
 
             }
@@ -242,7 +238,7 @@ namespace Zipper
                     {
                         foreach (ListViewItem item in listView1.SelectedItems)
                         {
-                            if (item.Text.Equals(entry.Key))
+                            if (item.Text.Equals(entry.Key) || dirName + item.Text == entry.Key)
                             {
                                 entry.WriteToDirectory(folderBrowserDialog1.SelectedPath, new ExtractionOptions()
                                 {
@@ -253,12 +249,8 @@ namespace Zipper
                             }
                         }
                     }
-                    MessageBox.Show("Archive Extracted.");
                     progressBarForm.Hide();
-                    notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
-                    notifyIcon1.BalloonTipText = "The file '" + Path.GetFileName(fileName) + "' has been successfully extracted.";
-                    notifyIcon1.BalloonTipTitle = "Extraction Complete";
-                    notifyIcon1.ShowBalloonTip(1000);
+                    OpenMessageBox("Extraction", "The archive has been successfully extracted.");
                 }
             }
         }
@@ -276,6 +268,15 @@ namespace Zipper
             options.ShowDialog();
         }
 
+        private void OpenMessageBox(string title, string description)
+        {
+            using (var form = new MessageBoxForm(title, description))
+            {
+                form.StartPosition = FormStartPosition.CenterParent;
+                form.ShowDialog();
+            }
+        }
+
         private void listView1_DoubleClick(object sender, EventArgs e)
         {
             List<string> selection = new List<string>();
@@ -285,22 +286,44 @@ namespace Zipper
             {
                 foreach (ListViewItem item in listView1.SelectedItems)
                 {
-                    if (item.Text.Equals(entry.Key))
+                    Debug.WriteLine(dirName);
+                    if (item.Text.Equals(entry.Key) || dirName + item.Text == entry.Key)
                     {
-                        entry.WriteToDirectory(Path.GetTempPath() + @"\ZipperTMP\", new ExtractionOptions()
+                        if (!entry.IsDirectory)
                         {
-                            ExtractFullPath = true,
-                            Overwrite = true
-                        });
-                        selection.Add(Path.GetTempPath() + @"\ZipperTMP\" + item.Text);
-                        Process tempExtractProcess = new Process
-                        {
-                            StartInfo = new ProcessStartInfo(Path.GetTempPath() + @"\ZipperTMP\" + item.Text)
+                            entry.WriteToDirectory(Path.GetTempPath() + @"\ZipperTMP\", new ExtractionOptions()
                             {
-                                UseShellExecute = true
+                                ExtractFullPath = true,
+                                Overwrite = true
+                            });
+                            selection.Add(Path.GetTempPath() + @"\ZipperTMP\" + entry.Key);
+                            Process tempExtractProcess = new Process
+                            {
+                                StartInfo = new ProcessStartInfo(Path.GetTempPath() + @"\ZipperTMP\" + entry.Key)
+                                {
+                                    UseShellExecute = true
+                                }
+                            };
+                            tempExtractProcess.Start();
+                        }
+                        else
+                        {
+                            dirName = entry.Key;
+                            listView1.Items.Clear();
+                            foreach (var archiveentry in archive.Entries)
+                            {
+                                //Do something with this
+                                //(dirName == "" && Path.GetFileName(Path.GetDirectoryName(entry.Key)) == @"\" && entry.IsDirectory)
+
+                                if ((archiveentry.Key == dirName + Path.GetFileName(archiveentry.Key) && Path.GetFileName(archiveentry.Key) != "") || archiveentry.Key == dirName + "/" + Path.GetDirectoryName(archiveentry.Key) + "/" || (Path.GetDirectoryName(archiveentry.Key) == dirName + Path.GetFileName(Path.GetDirectoryName(archiveentry.Key)) && archiveentry.IsDirectory))
+                                {
+                                    ListViewItem lvi = new ListViewItem(Path.GetFileName(archiveentry.Key), 1);
+                                    lvi.SubItems.Add(archiveentry.Size.ToString("N0"));
+                                    lvi.SubItems.Add(archiveentry.LastModifiedTime.ToString());
+                                    listView1.Items.Add(lvi);
+                                }
                             }
-                        };
-                        tempExtractProcess.Start();
+                        }
                     }
                 }
             }
@@ -344,14 +367,14 @@ namespace Zipper
             {
                 foreach (ListViewItem item in listView1.SelectedItems)
                 {
-                    if (item.Text.Equals(entry.Key))
+                    if (item.Text.Equals(entry.Key) || dirName + item.Text == (entry.Key))
                     {
                         entry.WriteToDirectory(Path.GetTempPath() + @"\ZipperTMP\", new ExtractionOptions()
                         {
                             ExtractFullPath = true,
                             Overwrite = true
                         });
-                        selection.Add(Path.GetTempPath() + @"\ZipperTMP\" + item.Text);
+                        selection.Add(Path.GetTempPath() + @"\ZipperTMP\" + entry.Key);
                     }
 
                 }

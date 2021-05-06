@@ -18,11 +18,11 @@ namespace Zipper
             InitializeComponent();
             if (Properties.Settings.Default.Dark == true)
             {
-                this.BackColor = Color.FromArgb(48, 48, 48);
+                this.BackColor = Color.FromArgb(34, 34, 34);
+                BackgroundAccent.BackColor = Color.FromArgb(0, 0, 0);
+                TitleLabel.BackColor = Color.FromArgb(0, 0, 0);
                 TitleLabel.ForeColor = Color.FromArgb(255, 255, 255);
                 DescriptionLabel.ForeColor = Color.FromArgb(255, 255, 255);
-                CancelButton.BackColor = Color.FromArgb(88, 88, 88);
-                CancelButton.ForeColor = Color.FromArgb(255, 255, 255);
                 UseImmersiveDarkMode(this.Handle, IsWindows10OrGreater());
             }
             TitleLabel.Text = title;

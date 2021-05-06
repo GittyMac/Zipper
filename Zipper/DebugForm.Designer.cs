@@ -34,7 +34,7 @@ namespace Zipper
             this.MessageBoxButton = new System.Windows.Forms.Button();
             this.TitleText = new System.Windows.Forms.TextBox();
             this.DescriptionText = new System.Windows.Forms.TextBox();
-            this.Close = new System.Windows.Forms.Button();
+            this.CloseButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -81,19 +81,19 @@ namespace Zipper
             this.DescriptionText.TabIndex = 3;
             this.DescriptionText.Text = "Description";
             // 
-            // Close
+            // CloseButton
             // 
-            this.Close.BackColor = System.Drawing.SystemColors.Highlight;
-            this.Close.FlatAppearance.BorderSize = 0;
-            this.Close.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Close.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.Close.Location = new System.Drawing.Point(237, 173);
-            this.Close.Name = "Close";
-            this.Close.Size = new System.Drawing.Size(72, 35);
-            this.Close.TabIndex = 4;
-            this.Close.Text = "Close";
-            this.Close.UseVisualStyleBackColor = false;
-            this.Close.Click += new System.EventHandler(this.Close_Click);
+            this.CloseButton.BackColor = System.Drawing.SystemColors.Highlight;
+            this.CloseButton.FlatAppearance.BorderSize = 0;
+            this.CloseButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.CloseButton.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.CloseButton.Location = new System.Drawing.Point(237, 173);
+            this.CloseButton.Name = "CloseButton";
+            this.CloseButton.Size = new System.Drawing.Size(72, 35);
+            this.CloseButton.TabIndex = 4;
+            this.CloseButton.Text = "Close";
+            this.CloseButton.UseVisualStyleBackColor = false;
+            this.CloseButton.Click += new System.EventHandler(this.Close_Click);
             // 
             // DebugForm
             // 
@@ -101,7 +101,7 @@ namespace Zipper
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(321, 220);
-            this.Controls.Add(this.Close);
+            this.Controls.Add(this.CloseButton);
             this.Controls.Add(this.DescriptionText);
             this.Controls.Add(this.TitleText);
             this.Controls.Add(this.MessageBoxButton);
@@ -122,6 +122,6 @@ namespace Zipper
         private System.Windows.Forms.Button MessageBoxButton;
         private System.Windows.Forms.TextBox TitleText;
         private System.Windows.Forms.TextBox DescriptionText;
-        private System.Windows.Forms.Button Close;
+        private System.Windows.Forms.Button CloseButton;
     }
 }
