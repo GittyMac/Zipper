@@ -258,7 +258,8 @@ namespace Zipper
         private void archiveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ArchivePopup archive = new ArchivePopup();
-            archive.Show();
+            archive.StartPosition = FormStartPosition.CenterParent;
+            archive.ShowDialog();
         }
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)

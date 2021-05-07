@@ -23,13 +23,14 @@ namespace Zipper
                 button3.BackColor = Color.FromArgb(88, 88, 88);
                 button3.ForeColor = Color.FromArgb(255, 255, 255);
                 checkBox1.ForeColor = Color.FromArgb(255, 255, 255);
+                BackgroundAccent.BackColor = Color.FromArgb(0, 0, 0);
+                label1.BackColor = Color.FromArgb(0, 0, 0);
                 label1.ForeColor = Color.FromArgb(255, 255, 255);
                 label3.ForeColor = Color.FromArgb(255, 255, 255);
                 textBox1.BackColor = Color.FromArgb(48, 48, 48);
                 textBox2.BackColor = Color.FromArgb(48, 48, 48);
                 textBox1.ForeColor = Color.FromArgb(255, 255, 255);
                 textBox2.ForeColor = Color.FromArgb(255, 255, 255);
-                progressBar1.BackColor = Color.FromArgb(48, 48, 48);
             }
         }
 
@@ -62,14 +63,12 @@ namespace Zipper
             {
                 try
                 {
-                    progressBar1.Maximum = openFileDialog1.FileNames.Length;
                     using (var archive = ZipArchive.Create())
                     {
                         foreach (String file in openFileDialog1.FileNames)
                         {
                             FileInfo fi = new FileInfo(file);
                             archive.AddEntry(fi.Name, file);
-                            progressBar1.PerformStep();
                         }
                         archive.SaveTo(textBox2.Text, CompressionType.Deflate);
                         MessageBox.Show("Archive created.");
