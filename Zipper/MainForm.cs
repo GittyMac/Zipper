@@ -13,8 +13,11 @@ namespace Zipper
 {
 
     //Zipper
-    //2020-2021 Lako
-    //This project is a complete mess.
+    //2020-2022 Lako
+    
+    //MAJOR TODO - Work with strange ways of handling directories.
+    //Like archives that don't explicitly mention directorys (ex. folder/file.ext)
+    //Or archives that are all over the place.
 
     public partial class MainForm : Form
     {
@@ -121,16 +124,25 @@ namespace Zipper
                     this.Text = "Zipper - " + openFileDialog1.FileName;
                     listView1.Items.Clear();
                     Properties.Settings.Default.Save();
-                    foreach (var entry in archive.Entries)
+                    foreach (var arcentry in archive.Entries)
                     {
                         //Do something with this
                         //(dirName == "" && Path.GetFileName(Path.GetDirectoryName(entry.Key)) == @"\" && entry.IsDirectory)
 
-                        if (entry.Key == dirName + Path.GetFileName(entry.Key) || entry.Key == dirName + "/" + Path.GetDirectoryName(entry.Key) + "/" || (Path.GetDirectoryName(entry.Key) == dirName + Path.GetFileName(Path.GetDirectoryName(entry.Key)) && entry.IsDirectory))
+                        Debug.WriteLine(arcentry.Key);
+
+                        if (arcentry.Key == dirName + Path.GetFileName(arcentry.Key) ||
+                            arcentry.Key == dirName + "/" + Path.GetDirectoryName(arcentry.Key) + "/" ||
+                            arcentry.Key == dirName + "/" + Path.GetFileName(arcentry.Key) ||
+                            arcentry.Key == dirName + Path.GetFileName(Path.GetDirectoryName(arcentry.Key)) ||
+                            arcentry.Key == dirName + Path.GetFileName(Path.GetDirectoryName(arcentry.Key)) + "/" ||
+                            (Path.GetDirectoryName(arcentry.Key) == dirName + Path.GetFileName(Path.GetDirectoryName(arcentry.Key)) && arcentry.IsDirectory) ||
+                            (Path.GetDirectoryName(arcentry.Key) == dirName + Path.GetFileName(Path.GetDirectoryName(arcentry.Key)) + "/" && arcentry.IsDirectory)
+                           )
                         {
-                            ListViewItem lvi = new ListViewItem(entry.Key, 1);
-                            lvi.SubItems.Add(entry.Size.ToString("N0"));
-                            lvi.SubItems.Add(entry.LastModifiedTime.ToString());
+                            ListViewItem lvi = new ListViewItem(arcentry.Key, 1);
+                            lvi.SubItems.Add(arcentry.Size.ToString("N0"));
+                            lvi.SubItems.Add(arcentry.LastModifiedTime.ToString());
                             listView1.Items.Add(lvi);
                         }
                     }
@@ -288,9 +300,9 @@ namespace Zipper
                 foreach (ListViewItem item in listView1.SelectedItems)
                 {
                     Debug.WriteLine(dirName);
-                    if (item.Text.Equals(entry.Key) || dirName + item.Text == entry.Key)
+                    if (item.Text.Equals(entry.Key) || dirName + item.Text == entry.Key || item.Text.Equals("./"))
                     {
-                        if (!entry.IsDirectory)
+                        if (!entry.IsDirectory && !item.Text.Equals("./"))
                         {
                             entry.WriteToDirectory(Path.GetTempPath() + @"\ZipperTMP\", new ExtractionOptions()
                             {
@@ -309,19 +321,85 @@ namespace Zipper
                         }
                         else
                         {
-                            dirName = entry.Key;
                             listView1.Items.Clear();
-                            foreach (var archiveentry in archive.Entries)
+                            if (item.Text.Equals("./"))
                             {
-                                //Do something with this
-                                //(dirName == "" && Path.GetFileName(Path.GetDirectoryName(entry.Key)) == @"\" && entry.IsDirectory)
-
-                                if ((archiveentry.Key == dirName + Path.GetFileName(archiveentry.Key) && Path.GetFileName(archiveentry.Key) != "") || archiveentry.Key == dirName + "/" + Path.GetDirectoryName(archiveentry.Key) + "/" || (Path.GetDirectoryName(archiveentry.Key) == dirName + Path.GetFileName(Path.GetDirectoryName(archiveentry.Key)) && archiveentry.IsDirectory))
+                                Debug.WriteLine(dirName);
+                                string preDirName = dirName;
+                                if (dirName.EndsWith("/"))
                                 {
-                                    ListViewItem lvi = new ListViewItem(Path.GetFileName(archiveentry.Key), 1);
-                                    lvi.SubItems.Add(archiveentry.Size.ToString("N0"));
-                                    lvi.SubItems.Add(archiveentry.LastModifiedTime.ToString());
-                                    listView1.Items.Add(lvi);
+                                    dirName = dirName.Replace(Path.GetFileName(Path.GetDirectoryName(dirName)) + "/", "");
+                                }else if (dirName.EndsWith(@"\"))
+                                {
+                                    dirName = dirName.Replace(Path.GetFileName(Path.GetDirectoryName(dirName)) + @"\", "");
+                                }
+                                
+                                if(preDirName + @".." == dirName)
+                                {
+                                    dirName = "";
+                                }
+                                Debug.WriteLine(dirName);
+                            }
+                            else
+                            {
+                                dirName = entry.Key;
+                            }
+                            if (dirName != "")
+                            {
+                                ListViewItem lvi = new ListViewItem("./", 1);
+                                lvi.SubItems.Add("0");
+                                lvi.SubItems.Add("");
+                                listView1.Items.Add(lvi);
+                            }
+                            foreach (var arcentry in archive.Entries)
+                            {
+                                if (arcentry.Key == dirName + Path.GetFileName(arcentry.Key) ||
+                                    arcentry.Key == dirName + "/" + Path.GetDirectoryName(arcentry.Key) + "/" ||
+                                    arcentry.Key == dirName + "/" + Path.GetFileName(arcentry.Key) ||
+                                    arcentry.Key == dirName + Path.GetFileName(Path.GetDirectoryName(arcentry.Key)) ||
+                                    arcentry.Key == dirName + Path.GetFileName(Path.GetDirectoryName(arcentry.Key)) + "/" ||
+                                    arcentry.Key == dirName + Path.GetFileName(Path.GetDirectoryName(arcentry.Key)) + @"\" ||
+                                    arcentry.Key == dirName + @"\" + Path.GetDirectoryName(arcentry.Key) + @"\" ||
+                                    arcentry.Key == dirName + @"\" + Path.GetFileName(arcentry.Key) ||
+                                    (Path.GetDirectoryName(arcentry.Key) == dirName + Path.GetFileName(Path.GetDirectoryName(arcentry.Key)) && arcentry.IsDirectory) ||
+                                    (Path.GetDirectoryName(arcentry.Key) == dirName + Path.GetFileName(Path.GetDirectoryName(arcentry.Key)) + "/" && arcentry.IsDirectory)
+                                   )
+                                {
+                                    if (arcentry.IsDirectory)
+                                    {
+                                        //Debug.WriteLine(arcentry.Key);
+                                        if (arcentry.Key != dirName)
+                                        {
+                                            if (arcentry.Key.EndsWith("/"))
+                                            {
+                                                ListViewItem lvi = new ListViewItem(Path.GetFileName(Path.GetDirectoryName(arcentry.Key)) + "/", 1);
+                                                lvi.SubItems.Add(arcentry.Size.ToString("N0"));
+                                                lvi.SubItems.Add(arcentry.LastModifiedTime.ToString());
+                                                listView1.Items.Add(lvi);
+                                            }
+                                            else if (arcentry.Key.EndsWith(@"\"))
+                                            {
+                                                ListViewItem lvi = new ListViewItem(Path.GetFileName(Path.GetDirectoryName(arcentry.Key)) + @"\", 1);
+                                                lvi.SubItems.Add(arcentry.Size.ToString("N0"));
+                                                lvi.SubItems.Add(arcentry.LastModifiedTime.ToString());
+                                                listView1.Items.Add(lvi);
+                                            }
+                                            else
+                                            {
+                                                ListViewItem lvi = new ListViewItem(Path.GetFileName(Path.GetDirectoryName(arcentry.Key)), 1);
+                                                lvi.SubItems.Add(arcentry.Size.ToString("N0"));
+                                                lvi.SubItems.Add(arcentry.LastModifiedTime.ToString());
+                                                listView1.Items.Add(lvi);
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        ListViewItem lvi = new ListViewItem(Path.GetFileName(arcentry.Key), 1);
+                                        lvi.SubItems.Add(arcentry.Size.ToString("N0"));
+                                        lvi.SubItems.Add(arcentry.LastModifiedTime.ToString());
+                                        listView1.Items.Add(lvi);
+                                    }
                                 }
                             }
                         }
